@@ -16,19 +16,25 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   TextEditingController titleController = TextEditingController();
   TextEditingController amountController = TextEditingController();
-  Future<Map<int, double>>? _monthlyTotalsFuture;
+  Future<Map<String, double>>? _monthlyTotalsFuture;
+  Future<double>? _calculateCurrentMonthTotalFuture;
 
   @override
   void initState() {
     Provider.of<ExpensesDatabase>(context, listen: false).getAllExpenses();
-    refreshBarGraph();
+    refreshData();
     super.initState();
   }
 
-  void refreshBarGraph() {
+  void refreshData() {
     _monthlyTotalsFuture = Provider.of<ExpensesDatabase>(context, listen: false)
         .calculateMonthlyExpenses(
             Provider.of<ExpensesDatabase>(context, listen: false));
+
+    _calculateCurrentMonthTotalFuture =
+        Provider.of<ExpensesDatabase>(context, listen: false)
+            .calculateCurrentMonthTotal(
+                Provider.of<ExpensesDatabase>(context, listen: false));
   }
 
   void openNewExpenseBox() {
@@ -120,6 +126,26 @@ class _HomePageState extends State<HomePage> {
             startYear, startMonth, currentYear, currentMonth);
         final expenses = db.getAllExpenses();
         return Scaffold(
+          appBar: AppBar(
+            centerTitle: true,
+            backgroundColor: Colors.transparent,
+            title: FutureBuilder<double>(
+                future: _calculateCurrentMonthTotalFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return Row(
+                      // i will add a app drawer
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('\$${snapshot.data!.toStringAsFixed(2)}'),
+                        Text(getCurrentMonthName()),
+                      ],
+                    );
+                  } else {
+                    return const Text('Loading...');
+                  }
+                }),
+          ),
           backgroundColor: Colors.grey.shade300,
           floatingActionButton: FloatingActionButton(
             onPressed: openNewExpenseBox,
@@ -134,11 +160,16 @@ class _HomePageState extends State<HomePage> {
                     future: _monthlyTotalsFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done) {
-                        final monthlyTotals = snapshot.data!;
-                        List<double> monthlySummary = List.generate(
-                            monthCount,
-                            (index) =>
-                                monthlyTotals[startMonth + index] ?? 0.0);
+                        Map<String, double> monthlyTotals = snapshot.data!;
+                        List<double> monthlySummary =
+                            List.generate(monthCount, (index) {
+                          int month = (startMonth + index - 1) ~/ 12 + 1;
+                          int year = startYear + (startMonth + index) ~/ 12;
+                          String yearMonth =
+                              '$year-${month.toString().padLeft(2, '0')}';
+
+                          return monthlyTotals[yearMonth] ?? 0.0;
+                        });
                         return MyBarGraph(
                             monthlyExpenses: monthlySummary,
                             startMonth: startMonth);
@@ -148,6 +179,7 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                 ),
+                const SizedBox(height: 25),
                 Expanded(
                   child: ListView.builder(
                     itemCount: expenses.length,
@@ -195,7 +227,7 @@ class _HomePageState extends State<HomePage> {
             convertToDouble(amountController.text),
             DateTime.now(),
           );
-          refreshBarGraph();
+          refreshData();
 
           titleController.clear();
           amountController.clear();
@@ -223,7 +255,7 @@ class _HomePageState extends State<HomePage> {
           if (index != -1) {
             db.updateExpense(index, updatedExpense);
           }
-          refreshBarGraph();
+          refreshData();
 
           titleController.clear();
           amountController.clear();
@@ -242,7 +274,7 @@ class _HomePageState extends State<HomePage> {
           db.deleteExpense(index); // Delete the expense from the database
         }
         Navigator.pop(context);
-        refreshBarGraph();
+        refreshData();
 // Close the dialog after deletion
       },
       child: const Text('Delete'),

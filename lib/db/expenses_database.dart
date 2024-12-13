@@ -7,7 +7,7 @@ class ExpensesDatabase extends ChangeNotifier {
     _initialize();
   }
 
-  Box<Expense>? _expenseBox;  // Store the Hive box reference for reuse
+  Box<Expense>? _expenseBox; // Store the Hive box reference for reuse
 
   Future<void> _initialize() async {
     _expenseBox = await Hive.openBox<Expense>('expenses');
@@ -16,7 +16,7 @@ class ExpensesDatabase extends ChangeNotifier {
 
   void addExpense(String title, double amount, DateTime date) async {
     final expense = Expense(name: title, amount: amount, date: date);
-    await _expenseBox?.add(expense);  // Add expense to the Hive box
+    await _expenseBox?.add(expense); // Add expense to the Hive box
 
     notifyListeners(); // Notify listeners to update UI
   }
@@ -26,34 +26,49 @@ class ExpensesDatabase extends ChangeNotifier {
   }
 
   void updateExpense(int index, Expense updatedExpense) async {
-    await _expenseBox?.putAt(index, updatedExpense);  // Update the expense
+    await _expenseBox?.putAt(index, updatedExpense); // Update the expense
     notifyListeners(); // Notify listeners to update UI
   }
 
   void deleteExpense(int index) async {
-    await _expenseBox?.deleteAt(index);  // Delete the expense
+    await _expenseBox?.deleteAt(index); // Delete the expense
     notifyListeners(); // Notify listeners to update UI
   }
 
+  Future<Map<String, double>> calculateMonthlyExpenses(
+      ExpensesDatabase db) async {
+    Map<String, double> monthlyTotals = {};
 
-  Future<Map<int, double>> calculateMonthlyExpenses(ExpensesDatabase db) async {
-  Map<int, double> monthlyTotals = {};
+    // Retrieve expenses using the ExpensesDatabase instance
+    List<Expense> expenses = db.getAllExpenses();
 
-  // Retrieve expenses using the ExpensesDatabase instance
-  List<Expense> expenses =  db.getAllExpenses();
+    for (var expense in expenses) {
+      String yearMonth = '${expense.date.year}-${expense.date.month}';
 
-  for (var expense in expenses) {
-    int month = expense.date.month;
+      if (!monthlyTotals.containsKey(yearMonth)) {
+        monthlyTotals[yearMonth] = 0;
+      }
 
-    if (!monthlyTotals.containsKey(month)) {
-      monthlyTotals[month] = 0;
+      monthlyTotals[yearMonth] = monthlyTotals[yearMonth]! + expense.amount;
     }
 
-    monthlyTotals[month] = monthlyTotals[month]! + expense.amount;
+    return monthlyTotals;
   }
 
-  return monthlyTotals;
-}
+  Future<double> calculateCurrentMonthTotal(ExpensesDatabase db) async {
+    getAllExpenses();
+    int currentMonth = DateTime.now().month;
+    int currentYear = DateTime.now().year;
+    List<Expense> currentMonthExpenses = db.getAllExpenses().where(
+      (expense) {
+        return expense.date.month == currentMonth &&
+            expense.date.year == currentYear;
+      },
+    ).toList();
+    double total =
+        currentMonthExpenses.fold(0, (sum, expense) => sum + expense.amount);
+    return total;
+  }
 
   @override
   void dispose() {

@@ -16,6 +16,12 @@ class MyBarGraph extends StatefulWidget {
 class _MyBarGraphState extends State<MyBarGraph> {
   List<SingleBar> barData = [];
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) => scrollToEnd());
+  }
+
   void initializeBarData() {
     barData = List.generate(
         widget.monthlyExpenses.length,
@@ -36,6 +42,13 @@ class _MyBarGraphState extends State<MyBarGraph> {
     }
   }
 
+  final ScrollController _scrollController = ScrollController();
+
+  void scrollToEnd() {
+    _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+        duration: const Duration(seconds: 1), curve: Curves.fastOutSlowIn);
+  }
+
   @override
   Widget build(BuildContext context) {
     double barWidth = 15;
@@ -46,6 +59,7 @@ class _MyBarGraphState extends State<MyBarGraph> {
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      controller: _scrollController,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25),
         child: SizedBox(

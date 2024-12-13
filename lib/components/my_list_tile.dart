@@ -17,31 +17,43 @@ class MyListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      endActionPane: ActionPane(
-        motion: const StretchMotion(),
-        children: [
-          SlidableAction(
-            borderRadius: BorderRadius.circular(12),
-            backgroundColor: Colors.red.shade400,
-            foregroundColor: Colors.white,
-            onPressed: onDeletePressed,
-            icon: Icons.delete,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 25),
+      child: Slidable(
+        endActionPane: ActionPane(
+          motion: const StretchMotion(),
+          children: [
+            SlidableAction(
+              borderRadius: BorderRadius.circular(12),
+              backgroundColor: Colors.red.shade400,
+              foregroundColor: Colors.white,
+              onPressed: onDeletePressed,
+              icon: Icons.delete,
+            ),
+            SlidableAction(
+              borderRadius: BorderRadius.circular(12),
+              backgroundColor: Colors.blue.shade400,
+              foregroundColor: Colors.white,
+              onPressed: onEditPressed,
+              icon: Icons.edit,
+            )
+          ],
+        ),
+        child: Container(
+          height: 70,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.grey.shade100,
           ),
-          SlidableAction(
-            borderRadius: BorderRadius.circular(12),
-            backgroundColor: Colors.blue.shade400,
-            foregroundColor: Colors.white,
-            onPressed: onEditPressed,
-            icon: Icons.edit,
-          )
-        ],
-      ),
-      child: ListTile(
-        title: Text(title),
-        trailing: Text(
-          trailing,
-          style: const TextStyle(fontSize: 18),
+          child: Center(
+            child: ListTile(
+              title: Text(title),
+              trailing: Text(
+                trailing,
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+          ),
         ),
       ),
     );

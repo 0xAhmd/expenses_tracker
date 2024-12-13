@@ -1,6 +1,7 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:expenses_tracker/db/expenses_database.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:expenses_tracker/models/expense_model.dart';
 import 'package:expenses_tracker/pages/home_page.dart';
@@ -22,9 +23,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ExpensesDatabase(),
-      child: const MaterialApp(
+      child: MaterialApp(
+        theme: ThemeData(
+          fontFamily: GoogleFonts.lato().fontFamily,
+          useMaterial3: true,
+        ),
         debugShowCheckedModeBanner: false,
-        home: HomePage(),
+        home: const HomePage(),
       ),
     );
   }

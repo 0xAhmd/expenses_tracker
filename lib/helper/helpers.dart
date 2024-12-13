@@ -11,8 +11,6 @@ String formatCurrency(double amount) {
       .format(amount);
 }
 
-
-
 int getStartMonth(List<Expense> expenses) {
   if (expenses.isEmpty) {
     return DateTime.now().month;
@@ -22,7 +20,6 @@ int getStartMonth(List<Expense> expenses) {
   );
   return expenses.first.date.month;
 }
-
 
 int getStartYear(List<Expense> expenses) {
   if (expenses.isEmpty) {
@@ -34,10 +31,28 @@ int getStartYear(List<Expense> expenses) {
   return expenses.first.date.year;
 }
 
-
-
-int calculateMonthCount(int startYear , startMonth , currentYear , currentMonth) {
-  int monthCount = (currentYear - startYear) * 12 + (currentMonth - startMonth) + 1;
+int calculateMonthCount(int startYear, startMonth, currentYear, currentMonth) {
+  int monthCount =
+      (currentYear - startYear) * 12 + (currentMonth - startMonth) + 1;
 
   return monthCount;
+}
+
+String getCurrentMonthName() {
+  DateTime now = DateTime.now();
+  List<String> monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  return monthNames[now.month - 1];
 }
